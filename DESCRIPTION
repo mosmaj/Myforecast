@@ -1,4 +1,4 @@
-Package: forecast
+Package: Myforecast
 Version: 6.2
 Title: Forecasting Functions for Time Series and Linear Models
 Description: Methods and tools for displaying and analysing
@@ -16,4 +16,4 @@ Author: Rob J Hyndman <Rob.Hyndman@monash.edu> with contributions from
 Maintainer: Rob J Hyndman <Rob.Hyndman@monash.edu>
 BugReports: https://github.com/robjhyndman/forecast/issues
 License: GPL (>= 2)
-URL: http://github.com/robjhyndman/forecast
+URL: http://github.com/mosmaj/forecast
