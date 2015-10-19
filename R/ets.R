@@ -3,7 +3,7 @@ ets <- function(y, model="ZZZ", damped=NULL,
     lower=c(rep(0.0001,3), 0.8), upper=c(rep(0.9999,3),0.98),
     opt.crit=c("lik","amse","mse","sigma","mae"), nmse=3, bounds=c("both","usual","admissible"),
     ic=c("aicc","aic","bic"),restrict=TRUE, allow.multiplicative.trend=FALSE, 
-    use.initial.values=FALSE, ...)
+    use.initial.values=FALSE, ofp=10, ...)
 {
   #dataname <- substitute(y)
   opt.crit <- match.arg(opt.crit)
@@ -65,7 +65,7 @@ ets <- function(y, model="ZZZ", damped=NULL,
       seasontype <- substr(modelcomponents,3,3)
 
       # Recompute errors from pegelsresid.C
-      e <- pegelsresid.C(y, m, model$initstate, errortype, trendtype, seasontype, damped, alpha, beta, gamma, phi, nmse)
+      e <- pegelsresid.C(y, m, model$initstate, errortype, trendtype, seasontype, damped, alpha, beta, gamma, phi, nmse, ofp)
 
       # Compute error measures
       np <- length(model$par)
@@ -210,7 +210,7 @@ ets <- function(y, model="ZZZ", damped=NULL,
           if(!data.positive & errortype[i]=="M")
             next
           fit <- etsmodel(y,errortype[i],trendtype[j],seasontype[k],damped[l],alpha,beta,gamma,phi,
-              lower=lower,upper=upper,opt.crit=opt.crit,nmse=nmse,bounds=bounds, ...)
+              lower=lower,upper=upper,opt.crit=opt.crit,nmse=nmse,bounds=bounds,ofp=ofp, ...)
           fit.ic <- switch(ic,aic=fit$aic,bic=fit$bic,aicc=fit$aicc)
           if(!is.na(fit.ic))
           {
@@ -289,7 +289,7 @@ getNewBounds <- function(par, lower, upper, nstate) {
 
 etsmodel <- function(y, errortype, trendtype, seasontype, damped,
     alpha=NULL, beta=NULL, gamma=NULL, phi=NULL,
-    lower, upper, opt.crit, nmse, bounds, maxit=2000, control=NULL, seed=NULL, trace=FALSE)
+    lower, upper, opt.crit, nmse, bounds, ofp, maxit=2000, control=NULL, seed=NULL, trace=FALSE)
 {
 
   tsp.y <- tsp(y)
@@ -451,7 +451,7 @@ etsmodel <- function(y, errortype, trendtype, seasontype, damped,
     gamma <- fit.par["gamma"]
   if(!is.na(fit.par["phi"]))
     phi <- fit.par["phi"]
-  e <- pegelsresid.C(y,m,init.state,errortype,trendtype,seasontype,damped,alpha,beta,gamma,phi,nmse)
+  e <- pegelsresid.C(y,m,init.state,errortype,trendtype,seasontype,damped,alpha,beta,gamma,phi,nmse,ofp)
 
   n <- length(y)
   aic <- e$lik + 2*np
@@ -823,7 +823,7 @@ lik <- function(par,y,nstate,errortype,trendtype,seasontype,damped,par.noopt,low
       return(Inf)
   }
 
-  e <- pegelsresid.C(y,m,init.state,errortype,trendtype,seasontype,damped,alpha,beta,gamma,phi,nmse)
+  e <- pegelsresid.C(y,m,init.state,errortype,trendtype,seasontype,damped,alpha,beta,gamma,phi,nmse,ofp)
 
   if(is.na(e$lik))
     return(Inf)
@@ -907,7 +907,7 @@ print.ets <- function(x,...)
 }
 
 
-pegelsresid.C <- function(y,m,init.state,errortype,trendtype,seasontype,damped,alpha,beta,gamma,phi,nmse)
+pegelsresid.C <- function(y,m,init.state,errortype,trendtype,seasontype,damped,alpha,beta,gamma,phi,nmse,ofp)
 {
   n <- length(y)
   p <- length(init.state)
@@ -940,6 +940,7 @@ pegelsresid.C <- function(y,m,init.state,errortype,trendtype,seasontype,damped,a
       as.double(lik),
       as.double(amse),
       as.integer(nmse),
+      as.double(ofp),
       PACKAGE="forecast")
   if(!is.na(Cout[[13]]))
   {

@@ -10,7 +10,7 @@
 
 // Functions called by R
 void etscalc(double *, int *, double *, int *, int *, int *, int *,
-    double *, double *, double *, double *, double *, double *, double *, int*);
+    double *, double *, double *, double *, double *, double *, double *, int*, double *);
 void etssimulate(double *, int *, int *, int *, int *,
     double *, double *, double *, double *, int *, double *, double *);
 void etsforecast(double *, int *, int *, int *, double *, int *, double *);
@@ -23,7 +23,7 @@ void update(double *, double *, double *, double *, double *, double *, int, int
 // ******************************************************************
 
 void etscalc(double *y, int *n, double *x, int *m, int *error, int *trend, int *season,
-    double *alpha, double *beta, double *gamma, double *phi, double *e, double *lik, double *amse, int *nmse)
+    double *alpha, double *beta, double *gamma, double *phi, double *e, double *lik, double *amse, int *nmse, double *ofp)
 {
     int i, j, nstates;
     double oldl, l, oldb, b, olds[24], s[24], f[30], lik2, tmp;
@@ -77,11 +77,17 @@ void etscalc(double *y, int *n, double *x, int *m, int *error, int *trend, int *
             e[i] = y[i] - f[0];
         else
             e[i] = (y[i] - f[0])/f[0];
+        
+        if(e[i]<0)
+            e[i] = (*ofp)*e[i];
+        
         for(j=0; j<(*nmse); j++)
         {
             if(i+j<(*n))
             {
                 tmp = y[i+j]-f[j];
+                if(tmp<0)
+                    tmp = (10)*tmp;
                 amse[j] += (tmp*tmp)/(*n);
             }
         }

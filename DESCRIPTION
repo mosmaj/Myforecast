@@ -1,4 +1,4 @@
-Package: Myforecast
+Package: forecast
 Version: 6.2
 Title: Forecasting Functions for Time Series and Linear Models
 Description: Methods and tools for displaying and analysing
